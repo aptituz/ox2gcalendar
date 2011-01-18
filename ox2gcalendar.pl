@@ -102,12 +102,13 @@ foreach my $appointment (@appointments) {
     my $id = $appointment->id;
     my $start_date = $appointment->start_date;
     my $end_date = $appointment->end_date;
+    my $all_day = $appointment->full_time;
 
     print Dumper($start_date);
     debugmsg "Found Appointment #$id: " . $start_date. " - " . $end_date . " $title";
     my $gcal_appointment = (defined $gcal_appointments->{$id}) ? $gcal_appointments->{$id} : Net::Google::Calendar::Entry->new();
     $gcal_appointment->title($title);
-    $gcal_appointment->when($appointment->start_date, $appointment->end_date);
+    $gcal_appointment->when($appointment->start_date, $appointment->end_date, $all_day);
     $gcal_appointment->visibility("private");
     $gcal_appointment->extended_property("ox-id", $appointment->id);
 
