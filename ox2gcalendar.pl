@@ -120,3 +120,5 @@ foreach my $appointment (@appointments) {
     }
 }
 printmsg "Added $new_entries new entries/Updated $updated_entries existing entries in Google Calendar '" . $gcal_obj->title . "'.";
+
+# vim: expandtab:ts=4:sw=4
