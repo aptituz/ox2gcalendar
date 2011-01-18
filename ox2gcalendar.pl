@@ -30,14 +30,14 @@ my $cfg_file = './ox2gcalendar.cf';
 
 my ($cfg) = LoadFile($cfg_file);
 
-my $ox_uri = $cfg->{ox_uri} || "";
-my $ox_login = $cfg->{ox_login} || "";
-my $ox_password = $cfg->{ox_password} || "";
-my $ox_folder_path = $cfg->{ox_folder_path} || "";
-my $ox_calendar = $cfg->{ox_calendar} || "";
-my $google_login = $cfg->{google_login} || "";
-my $google_password = $cfg->{google_password} || "";
-my $google_calendar = $cfg->{google_calendar} || "Geschaeftlich";
+my $ox_uri = $cfg->{ox_uri};
+my $ox_login = $cfg->{ox_login};
+my $ox_password = $cfg->{ox_password};
+my $ox_folder_path = $cfg->{ox_folder_path};
+my $ox_calendar = $cfg->{ox_calendar};
+my $google_login = $cfg->{google_login};
+my $google_password = $cfg->{google_password};
+my $google_calendar = $cfg->{google_calendar};
 
 my $opt_extract_months = $cfg->{extract_months} || "1";
 my $opt_masquerade_title = $cfg->{masquerade_title} || 0;
@@ -75,9 +75,7 @@ $gcalendar->login($google_login, $google_password);
 
 # Find the right google calendar
 my $gcal_obj;
-foreach my $current_calendar ($gcalendar->get_calendars) {
-    $gcal_obj = $current_calendar if ($current_calendar->title eq $google_calendar);
-}
+$gcal_obj = first { $_->title eq $google_calendar } ($gcalendar->get_calendars);
 $gcalendar->set_calendar($gcal_obj);
 debugmsg "Selected google calendar id " . $gcal_obj->id;
 debugmsg "Found " . scalar(@appointments) . " appointments in OX.";
@@ -104,7 +102,6 @@ foreach my $appointment (@appointments) {
     my $end_date = $appointment->end_date;
     my $all_day = $appointment->full_time;
 
-    print Dumper($start_date);
     debugmsg "Found Appointment #$id: " . $start_date. " - " . $end_date . " $title";
     my $gcal_appointment = (defined $gcal_appointments->{$id}) ? $gcal_appointments->{$id} : Net::Google::Calendar::Entry->new();
     $gcal_appointment->title($title);
