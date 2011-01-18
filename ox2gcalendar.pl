@@ -66,7 +66,7 @@ my $ox = Net::OpenXchange->new(uri => $ox_uri, login => $ox_login, password => $
 my $folder = $ox->folder->resolve_path($ox_folder_path, $ox_calendar);
 my @appointments = $ox->calendar->all(folder => $folder,
                                         start => DateTime->now()->truncate( to => 'day' ),
-                                        end => DateTime->now()->truncate( to => 'day')->add( months => 1 ));
+                                        end => DateTime->now()->truncate( to => 'day')->add( months => $opt_extract_months ));
 
 # Initialize google calendar conncetion
 debugmsg "Logging into Google Calendar, using login: $ox_login and password: ********";
