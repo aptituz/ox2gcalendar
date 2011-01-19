@@ -1,0 +1,44 @@
+ox2gcalendar
+------------
+This is a utility to synchronize OX calendar entries to a google entry.
+For example to keep track of business appointments in your private
+calendar.
+
+Features
+--------
+- Configuration in a YAML file
+- Configurable number of months that will be scanned for events in the OX calendar
+- Masquerading of appointment descriptions with a configurable string
+
+Requirements
+------------
+This module requires the following perl modules:
+
+DateTime (libdatetime-perl)
+Net::OpenXChange (which is unfortunately not public yet)
+Net::Google::Calendar
+YAML (libyaml-perl)
+
+Configuration
+-------------
+The script requires a configuration file which stores your login information
+for OX and Google. An example can be found in the examples directory.
+It must reside at
+
+~/.config/ox2gcalendar/ox2gcalendar.cf
+
+OR
+
+~/ox2gcalendar.cf
+
+Usage
+-----
+Once you have a configuration file, just execute the program.
+You can call it with the option -v to see whats going on or
+even -d if you are interested in debugging information.
+
+Bugs
+----
+The tool currently supports creating and updating entries but
+it does not support deleting entries if they get deleted in OX.
+
