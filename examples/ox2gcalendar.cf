@@ -1,0 +1,19 @@
+# Specifies the URI to the OX AJAX api
+ox_uri: https://ox.yourhost.com/ajax
+ox_login: <user>
+ox_password: <password>
+ox_folder_path: Private folders
+ox_calendar: Calendar
+google_login: foo.bar@googlemail.com
+google_password: <password>
+google_calendar: Geschaeftlich
+
+# Settings
+# This defines how many months in advance will be scanned for events in the ox calendar,
+# default is 1
+extract_months: 3
+# If this is set to 1 titles of events will be masqueraded by replacing them with
+# the string defined with "masquerade_string"
+masquerade_title: 1
+# String for the masquerade_title setting, default: "Geschäftstermin"
+masquerade_string: Geschäftstermin
