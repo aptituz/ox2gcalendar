@@ -17,7 +17,7 @@
 use strict;
 use warnings;
 
-use lib 'lib';
+use File::Basename;
 use Net::OpenXchange;
 use Net::Google::Calendar;
 use List::Util qw(first);
@@ -25,10 +25,22 @@ use DateTime;
 use Data::Dumper;
 use Getopt::Long;
 use YAML qw(LoadFile);
+use Env qw(HOME);
 
-my $cfg_file = './ox2gcalendar.cf';
-
-my ($cfg) = LoadFile($cfg_file);
+my $progname = basename($0);
+# Locate and load configuration
+my $cfg_file;
+foreach my $file qw( .config/ox2gcalendar/ox2gcalendar.cf .ox2gcalendar.cf ) {
+    my $file_path = $HOME . "/" . $file;
+    if ( -e $file_path ) {
+        $cfg_file = $file_path;
+    }
+}
+if (not $cfg_file) {
+    print STDERR "$progname: need a configuration file, please have a look at the manpage.\n";
+    exit(1);
+}
+my ($cfg) = LoadFile($cfg_file) or die "$progname: unable to open configuration file ($cfg_file): $!";
 
 my $ox_uri = $cfg->{ox_uri};
 my $ox_login = $cfg->{ox_login};
@@ -64,9 +76,11 @@ sub printmsg {
 debugmsg "Logging into OX, using login: $ox_login and password: ********";
 my $ox = Net::OpenXchange->new(uri => $ox_uri, login => $ox_login, password => $ox_password);
 my $folder = $ox->folder->resolve_path($ox_folder_path, $ox_calendar);
-my @appointments = $ox->calendar->all(folder => $folder,
-                                        start => DateTime->now()->truncate( to => 'day' ),
-                                        end => DateTime->now()->truncate( to => 'day')->add( months => $opt_extract_months ));
+my @appointments = $ox->calendar->all(
+    folder => $folder,
+    start => DateTime->now()->truncate( to => 'day' ),
+    end => DateTime->now()->truncate( to => 'day')->add(months => $opt_extract_months)
+);
 
 # Initialize google calendar conncetion
 debugmsg "Logging into Google Calendar, using login: $ox_login and password: ********";
