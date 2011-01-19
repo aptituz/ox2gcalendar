@@ -17,6 +17,7 @@
 use strict;
 use warnings;
 
+use English qw('-no_match_vars');
 use File::Basename;
 use Net::OpenXchange;
 use Net::Google::Calendar;
@@ -50,7 +51,6 @@ my $ox_calendar = $cfg->{ox_calendar};
 my $google_login = $cfg->{google_login};
 my $google_password = $cfg->{google_password};
 my $google_calendar = $cfg->{google_calendar};
-
 my $opt_extract_months = $cfg->{extract_months} || "1";
 my $opt_masquerade_title = $cfg->{masquerade_title} || 0;
 my $opt_masquerade_string = "Geschäftstermin";
@@ -66,17 +66,19 @@ GetOptions(
 sub debugmsg {
     my $msg = shift;
     print STDERR "DEBUG: " . $msg . "\n" if $opt_debug;
+    return;
 }
 sub printmsg {
     my $msg = shift;
     print $msg . "\n" if $opt_verbose;
+    return;
 }
 
-# Initialize OX connection
+# Initialize OX connection and extract ox appointments
 debugmsg "Logging into OX, using login: $ox_login and password: ********";
 my $ox = Net::OpenXchange->new(uri => $ox_uri, login => $ox_login, password => $ox_password);
 my $folder = $ox->folder->resolve_path($ox_folder_path, $ox_calendar);
-my @appointments = $ox->calendar->all(
+my @ox_appointments = $ox->calendar->all(
     folder => $folder,
     start => DateTime->now()->truncate( to => 'day' ),
     end => DateTime->now()->truncate( to => 'day')->add(months => $opt_extract_months)
@@ -89,41 +91,46 @@ $gcalendar->login($google_login, $google_password);
 
 # Find the right google calendar
 my $gcal_obj;
-$gcal_obj = first { $_->title eq $google_calendar } ($gcalendar->get_calendars);
+$gcal_obj = first { $ARG->title eq $google_calendar } ($gcalendar->get_calendars);
 $gcalendar->set_calendar($gcal_obj);
 debugmsg "Selected google calendar id " . $gcal_obj->id;
-debugmsg "Found " . scalar(@appointments) . " appointments in OX.";
+debugmsg "Found " . scalar(@ox_appointments) . " appointments in OX.";
 
 # Find entries already stored in google calendar
-debugmsg "Google calendar " . $gcal_obj->title . " has " .scalar($gcalendar->get_events) . " entries.";
-my $gcal_appointments = {};
+debugmsg "Google calendar " . $gcal_obj->title . " has " . scalar($gcalendar->get_events) . " entries.";
+my $gcal_ox_appointments = {};
 foreach my $gcal_appointment ($gcalendar->get_events) {
     my $extended_props = $gcal_appointment->extended_property();
     if ($extended_props->{'ox-id'}) {
         my $id = $extended_props->{'ox-id'};
         debugmsg "Found existing OX appointment #$id";
-        $gcal_appointments->{$id} = $gcal_appointment;
+        $gcal_ox_appointments->{$id} = $gcal_appointment;
     }
 }
 
 my $new_entries=0;
 my $updated_entries=0;
-foreach my $appointment (@appointments) {
-    my $title = $appointment->title;
+foreach my $ox_appointment (@ox_appointments) {
+    my $title = $ox_appointment->title;
     $title = $opt_masquerade_string if $opt_masquerade_title;
-    my $id = $appointment->id;
-    my $start_date = $appointment->start_date;
-    my $end_date = $appointment->end_date;
-    my $all_day = $appointment->full_time;
+    my $id = $ox_appointment->id;
+    my $start_date = $ox_appointment->start_date;
+    my $end_date = $ox_appointment->end_date;
+    my $all_day = $ox_appointment->full_time;
 
     debugmsg "Found Appointment #$id: " . $start_date. " - " . $end_date . " $title";
-    my $gcal_appointment = (defined $gcal_appointments->{$id}) ? $gcal_appointments->{$id} : Net::Google::Calendar::Entry->new();
-    $gcal_appointment->title($title);
-    $gcal_appointment->when($appointment->start_date, $appointment->end_date, $all_day);
-    $gcal_appointment->visibility("private");
-    $gcal_appointment->extended_property("ox-id", $appointment->id);
+    # New or existing calendar entry object?
+    my $gcal_appointment = (defined $gcal_ox_appointments->{$id})
+        ? $gcal_ox_appointments->{$id}
+        : Net::Google::Calendar::Entry->new();
 
-    if (defined $gcal_appointments->{$id}) {
+    # Set appointment attributes
+    $gcal_appointment->title($title);
+    $gcal_appointment->when($ox_appointment->start_date, $ox_appointment->end_date, $all_day);
+    $gcal_appointment->visibility("private");
+    $gcal_appointment->extended_property("ox-id", $ox_appointment->id);
+
+    if (defined $gcal_ox_appointments->{$id}) {
         debugmsg "Entry $id is old. Updating it.";
         $gcalendar->update_entry($gcal_appointment);
         $updated_entries++;
