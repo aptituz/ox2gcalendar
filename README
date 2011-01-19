@@ -1,7 +1,7 @@
 ox2gcalendar
 ------------
-This is a utility to synchronize OX calendar entries to a google entry.
-For example to keep track of business appointments in your private
+This is a utility to synchronize OX calendar entries to a google calendar.
+An example use case is to keep track of business appointments in your private
 calendar.
 
 Features
