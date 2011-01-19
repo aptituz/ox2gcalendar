@@ -23,7 +23,6 @@ use Net::OpenXchange;
 use Net::Google::Calendar;
 use List::Util qw(first);
 use DateTime;
-use Data::Dumper;
 use Getopt::Long;
 use YAML qw(LoadFile);
 use Env qw(HOME);
