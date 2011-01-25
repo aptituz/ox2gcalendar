@@ -54,6 +54,7 @@ my $opt_appointment_filter = $cfg->{appointment_filter_regex};
 my $opt_extract_months = $cfg->{extract_months} || "1";
 my $opt_masquerade_title = $cfg->{masquerade_title} || 0;
 my $opt_masquerade_string = "Geschäftstermin";
+my $opt_masquerade_filter = $cfg->{masquerade_filter_regex};
 
 my $opt_debug=0;
 my $opt_verbose=0;
@@ -119,7 +120,9 @@ foreach my $ox_appointment (@ox_appointments) {
         next;
     }
 
-    $title = $opt_masquerade_string if $opt_masquerade_title;
+    if (not $opt_masquerade_filter or $title =~ $opt_masquerade_filter) {
+        $title = $opt_masquerade_string if $opt_masquerade_title;
+    }
     my $start_date = $ox_appointment->start_date;
     my $end_date = $ox_appointment->end_date;
     my $all_day = $ox_appointment->full_time;
