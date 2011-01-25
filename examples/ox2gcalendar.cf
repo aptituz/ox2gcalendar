@@ -17,3 +17,7 @@ extract_months: 3
 masquerade_title: 1
 # String for the masquerade_title setting, default: "Geschäftstermin"
 masquerade_string: Geschäftstermin
+# Regex which will exclude certain appointments from masquerading
+masquerade_filter_regex: "(?:Urlaub)"
+# Regex which will exclude certain appointments from export
+appointment_filter_regex: "(?:Do not export)"

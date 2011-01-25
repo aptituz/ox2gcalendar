@@ -9,6 +9,8 @@ Features
 - Configuration in a YAML file
 - Configurable number of months that will be scanned for events in the OX calendar
 - Masquerading of appointment descriptions with a configurable string
+- Exclude certain appointments from export by a filter regex
+- Exclude certain appointments from masquerading by a filter regex
 
 Requirements
 ------------
