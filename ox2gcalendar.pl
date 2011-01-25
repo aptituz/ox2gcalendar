@@ -50,6 +50,7 @@ my $ox_calendar = $cfg->{ox_calendar};
 my $google_login = $cfg->{google_login};
 my $google_password = $cfg->{google_password};
 my $google_calendar = $cfg->{google_calendar};
+my $opt_appointment_filter = $cfg->{appointment_filter_regex};
 my $opt_extract_months = $cfg->{extract_months} || "1";
 my $opt_masquerade_title = $cfg->{masquerade_title} || 0;
 my $opt_masquerade_string = "Geschäftstermin";
@@ -111,8 +112,14 @@ my $new_entries=0;
 my $updated_entries=0;
 foreach my $ox_appointment (@ox_appointments) {
     my $title = $ox_appointment->title;
-    $title = $opt_masquerade_string if $opt_masquerade_title;
     my $id = $ox_appointment->id;
+
+    if ($opt_appointment_filter and $title =~ $opt_appointment_filter) {
+        debugmsg "Skipping appointment $id because it matches the filter regex";
+        next;
+    }
+
+    $title = $opt_masquerade_string if $opt_masquerade_title;
     my $start_date = $ox_appointment->start_date;
     my $end_date = $ox_appointment->end_date;
     my $all_day = $ox_appointment->full_time;
